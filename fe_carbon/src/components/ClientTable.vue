@@ -3,14 +3,11 @@
     <el-container>
       <el-header style="margin-top: 50px">
         <el-form :inline="true" class="demo-form-inline">
-          <el-form-item label="Approved by">
+          <el-form-item label="ClientName">
             <el-input placeholder="输入客户结点名" />
           </el-form-item>
-          <el-form-item label="Activity zone">
-            <el-select placeholder="Activity zone">
-              <el-option label="Zone one" value="shanghai" />
-              <el-option label="Zone two" value="beijing" />
-            </el-select>
+          <el-form-item label="Client Coordinate">
+            <el-input placeholder="输入客户结点坐标" />
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="onSubmit">Query</el-button>
@@ -23,6 +20,12 @@
           <el-table-column prop="date" label="Date" width="180" />
           <el-table-column prop="name" label="Name" width="180" />
           <el-table-column prop="address" label="Address" />
+          <el-table-column fixed="right" label="Operations" width="120">
+            <template #default>
+              <el-button link type="primary" size="small" @click="handleClick">Edit</el-button>
+              <el-button link type="danger" size="small" @click="handleClick">Delete</el-button>
+            </template>
+          </el-table-column>
         </el-table>
       </el-main>
 
@@ -36,6 +39,10 @@
 <script>
 const onSubmit = () => {
   console.log("submit!");
+};
+
+const handleClick = () => {
+  console.log("onClick!");
 };
 
 const tableData = [
@@ -70,6 +77,7 @@ export default {
   },
   methods: {
     onSubmit,
+    onclick
   },
 };
 </script>
