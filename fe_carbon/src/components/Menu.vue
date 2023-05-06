@@ -6,16 +6,12 @@ export default {
 
 <template>
   <el-row style="height: 100%">
-    <el-menu
-      default-active="/client"
-      class="el-menu-vertical-demo"
-      :router="true"
-    >
-      <el-menu-item index="/1" style="height: 10%">
+    <el-menu default-active="/client" class="el-menu-vertical-demo" :router="true">
+      <el-menu-item index="/current" style="height: 10%">
         <i class="el-icon-menu"></i>
         <span style="font-size: 15px">当前事务路径图</span>
       </el-menu-item>
-      <el-menu-item index="/2" style="height: 10%">
+      <el-menu-item index="/transactionList" style="height: 10%">
         <i class="el-icon-menu"></i>
         <span style="font-size: 15px">历史事务查询</span>
       </el-menu-item>

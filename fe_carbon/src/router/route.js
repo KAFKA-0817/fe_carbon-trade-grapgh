@@ -3,6 +3,8 @@ import ClientTable from "../components/ClientTable.vue";
 import DistributorTable from "../components/DistributorTable.vue";
 import ProducerTable from "../components/ProducerTable.vue";
 import SupplierTable from "../components/SupplierTable.vue";
+import TransactionTable from "../components/TransactionTable.vue";
+import CurrentTransaction from "../components/CurrentTransaction.vue"
 
 
 const routes = [
@@ -17,9 +19,18 @@ const routes = [
   {
     path: "/producer",
     component: ProducerTable,
-  }, {
+  },
+  {
     path: "/supplier",
     component: SupplierTable,
+  },
+  {
+    path: "/transactionList",
+    component: TransactionTable,
+  },
+  {
+    path: "/current",
+    component: CurrentTransaction
   }
 ];
 
