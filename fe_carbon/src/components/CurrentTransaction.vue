@@ -7,17 +7,17 @@
             Change
           </el-button>
         </template>
-        <el-descriptions-item label="title">{{
+        <el-descriptions-item label="事务标题">{{
           description.title
         }}</el-descriptions-item>
-        <el-descriptions-item label="total_cost">{{
-          description.cost
+        <el-descriptions-item label="总经济成本">{{
+          description.totalC
         }}</el-descriptions-item>
-        <el-descriptions-item label="total_emission">{{
-          description.emission
+        <el-descriptions-item label="总碳排放量">{{
+          description.totalE
         }}</el-descriptions-item>
-        <el-descriptions-item label="nodes">
-          <span v-for="item in description.nodes">{{ item.name }},</span>
+        <el-descriptions-item label="事务结点">
+          <span v-for="item in description.vertices">{{ item.name }},</span>
         </el-descriptions-item>
         <el-descriptions-item label="select transaction">
           <el-select
@@ -27,9 +27,9 @@
             size="large"
           >
             <el-option
-              v-for="item in options"
+              v-for="item in allTransactions"
               :key="item.id"
-              :label="item.label"
+              :label="item.title"
               :value="item.id"
             />
           </el-select>
@@ -37,21 +37,26 @@
       </el-descriptions>
     </el-header>
 
-    <el-main style="margin-top: 150px">
+    <el-main style="margin-top: 100px">
       <el-row :gutter="20" style="margin-bottom: 20px">
-        <el-col :span="20"></el-col>
+        <el-col :span="18"></el-col>
         <el-col :span="2"
           ><el-button link type="primary" @click="addDialogVisible = true">
             Add Nodes
           </el-button></el-col
         >
         <el-col :span="2"
-          ><el-button link type="primary" @click="changeTransaction">
+          ><el-button link type="primary" @click="caculateModel">
+            calculate
+          </el-button></el-col
+        >
+        <el-col :span="2"
+          ><el-button link type="primary" @click="save">
             Save
           </el-button></el-col
         >
       </el-row>
-      <div ref="chartRef" style="width: 800px; height: 500px"></div>
+      <div ref="chartRef" style="width: 1500px; height: 700px"></div>
     </el-main>
 
     <el-footer></el-footer>
@@ -67,10 +72,10 @@
           style="width: 240px"
         >
           <el-option
-            v-for="item in description.nodes"
-            :key="item.name"
-            :label="item.name"
-            :value="item.name"
+            v-for="item in allNodes"
+            :key="item"
+            :label="item"
+            :value="item"
           />
         </el-select>
       </el-form-item>
@@ -85,8 +90,16 @@
 </template>
 
 <script>
-import { onMounted, ref, reactive } from "vue";
+import { onMounted, ref, reactive, watch } from "vue";
 import * as echarts from "echarts";
+import {
+  getCurrentTransaction,
+  getAllTransactions,
+  getAllNodeNames,
+  addNodes,
+  calculate,
+  saveTransaction,
+} from "../service/api";
 
 export default {
   name: "CurrentTransaction",
@@ -94,47 +107,65 @@ export default {
     const formLabelWidth = "140px";
     const chartRef = ref(null);
 
-    const description = {
-      title: "transaction_20230430",
-      cost: "867991.89",
-      emission: "1340",
-      nodes: [
-        {
-          name: "S1",
-        },
-        {
-          name: "S2",
-        },
-        {
-          name: "P1",
-        },
-        {
-          name: "P7",
-        },
-        {
-          name: "D2",
-        },
-        {
-          name: "C1",
-        },
-        {
-          name: "C4",
-        },
-      ],
-    };
+    const description = ref({});
+    const allNodes = ref([]);
+    const allTransactions = ref([]);
 
     const addForm = reactive({
-      nodes: ["S1", "S2"],
+      nodes: [],
     });
+
+    const save = () => {
+      let req = {
+        totalC: description.value.totalC,
+        totalE: description.value.totalE,
+      };
+      console.log(req);
+
+      saveTransaction(req).then((res) => {
+        if (res.data.code === 200) {
+          alert("success");
+          location.reload();
+        }
+      });
+    };
+
+    const caculateModel = () => {
+      calculate().then((res) => {
+        if (res.data.code === 200) {
+          alert("success");
+          description.value = res.data.data;
+        }
+      });
+    };
 
     const confirmAdd = () => {
       addDialogVisible.value = false;
-      console.log(addForm);
+      addNodes(addForm).then((res) => {
+        if (res.data.code === 200) {
+          alert("success");
+          location.reload();
+        }
+      });
     };
 
     const addDialogVisible = ref(false);
 
     onMounted(() => {
+      getCurrentTransaction().then((res) => {
+        description.value = res.data.data;
+      });
+
+      getAllTransactions().then((res) => {
+        allTransactions.value = res.data.data;
+      });
+
+      getAllNodeNames().then((res) => {
+        allNodes.value = res.data.data;
+      });
+    });
+
+    watch(description, (newValue, oldValue) => {
       const chart = echarts.init(chartRef.value);
       const option = {
         title: {
@@ -157,76 +188,8 @@ export default {
             edgeLabel: {
               fontSize: 20,
             },
-            data: [
-              {
-                name: "C1",
-                x: 104.47,
-                y: 856.72,
-              },
-              {
-                name: "C4",
-                x: 766.64,
-                y: 254.04,
-              },
-              {
-                name: "S1",
-                x: 556.91,
-                y: 547.93,
-              },
-              {
-                name: "S2",
-                x: 920.29,
-                y: 302.05,
-              },
-              {
-                name: "D2",
-                x: 621.24,
-                y: 633.03,
-              },
-              {
-                name: "P1",
-                x: 348.53,
-                y: 844.04,
-                value: 1000,
-              },
-              {
-                name: "P7",
-                x: 756.35,
-                y: 4.107,
-              },
-            ],
-            links: [
-              {
-                source: "S1",
-                target: "P1",
-                value: 1000,
-              },
-              {
-                source: "S2",
-                target: "P7",
-                value: 1000,
-              },
-              {
-                source: "P1",
-                target: "D2",
-                value: 1000,
-              },
-              {
-                source: "P7",
-                target: "D2",
-                value: 1000,
-              },
-              {
-                source: "D2",
-                target: "C1",
-                value: 1000,
-              },
-              {
-                source: "D2",
-                target: "C4",
-                value: 1000,
-              },
-            ],
+            data: newValue.vertices,
+            links: newValue.edges,
             lineStyle: {
               opacity: 0.9,
               width: 2,
@@ -245,28 +208,16 @@ export default {
       console.log(transactionId.value);
     };
 
-    const options = [
-      {
-        label: "transaction1",
-        id: "1",
-      },
-      {
-        label: "transaction2",
-        id: "2",
-      },
-      {
-        label: "transaction3",
-        id: "3",
-      },
-    ];
-
     return {
+      save,
+      caculateModel,
+      allNodes,
+      allTransactions,
       formLabelWidth,
       addForm,
       addDialogVisible,
       confirmAdd,
       description,
-      options,
       transactionId,
       changeTransaction,
       chartRef,

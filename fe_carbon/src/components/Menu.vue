@@ -38,3 +38,9 @@ export default {
     </el-menu>
   </el-row>
 </template>
+
+<style>
+.el-menu-item {
+  background-color: ghostwhite;
+}
+</style>

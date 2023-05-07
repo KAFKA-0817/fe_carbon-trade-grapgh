@@ -15,9 +15,10 @@
 
       <el-main>
         <el-table :data="tableData" stripe style="width: 100%">
-          <el-table-column prop="date" label="Date" width="180" />
-          <el-table-column prop="name" label="Name" width="180" />
-          <el-table-column prop="address" label="Address" />
+          <el-table-column prop="title" label="事务标题" />
+          <el-table-column prop="totalE" label="总碳排放量" />
+          <el-table-column prop="totalC" label="总经济成本" />
+          <el-table-column prop="status" label="事务状态" />
           <el-table-column fixed="right" label="Operations" width="120">
             <template #default="scope">
               <el-button
@@ -40,7 +41,12 @@
       </el-main>
 
       <el-footer>
-        <el-pagination background layout="prev, pager, next" :total="1000" />
+        <el-pagination
+          background
+          style="margin-left: 35%; margin-top: 20px"
+          layout="prev, pager, next"
+          :total="1"
+        />
       </el-footer>
     </el-container>
   </div>
@@ -70,41 +76,24 @@
 </template>
 
 <script>
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
+import { getAllTransactions } from "../service/api.js";
 
 export default {
   name: "TransactionTable",
   setup() {
+    const tableData = ref([]);
+
+    onMounted(() => {
+      getAllTransactions().then((res) => {
+        tableData.value = res.data.data;
+      });
+    });
+
     const deleteForm = reactive({
       id: "",
     });
 
-    const tableData = [
-      {
-        id: "10000001",
-        date: "2016-05-03",
-        name: "Tom",
-        address: "No. 189, Grove St, Los Angeles",
-      },
-      {
-        id: "10000002",
-        date: "2016-05-02",
-        name: "Tom",
-        address: "No. 189, Grove St, Los Angeles",
-      },
-      {
-        id: "10000003",
-        date: "2016-05-04",
-        name: "Tom",
-        address: "No. 189, Grove St, Los Angeles",
-      },
-      {
-        id: "10000004",
-        date: "2016-05-01",
-        name: "Tom",
-        address: "No. 189, Grove St, Los Angeles",
-      },
-    ];
     const onSubmit = () => {
       console.log("submit!");
     };

@@ -17,9 +17,11 @@
 
       <el-main>
         <el-table :data="tableData" stripe style="width: 100%">
-          <el-table-column prop="date" label="Date" width="180" />
-          <el-table-column prop="name" label="Name" width="180" />
-          <el-table-column prop="address" label="Address" />
+          <el-table-column prop="name" label="名称" width="180" />
+          <el-table-column prop="capacity" label="生产能力" width="180" />
+          <el-table-column prop="epp" label="单位生产碳排放" />
+          <el-table-column prop="cpp" label="单位生产成本" />
+          <el-table-column prop="coordinate" label="坐标" />
           <el-table-column fixed="right" label="Operations" width="120">
             <template #header>
               <el-button
@@ -51,7 +53,14 @@
       </el-main>
 
       <el-footer>
-        <el-pagination background layout="prev, pager, next" :total="1000" />
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :page-count="pages"
+          v-model:current-page="current"
+          @current-change="reloadTable"
+          style="margin-left: 35%; margin-top: 20px"
+        />
       </el-footer>
     </el-container>
   </div>
@@ -130,11 +139,33 @@
 </template>
 
 <script>
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
+import { getAllProducers } from "../service/api.js";
 
 export default {
   name: "ProducerTable",
   setup() {
+    const tableData = ref([]);
+    const current = ref(0);
+    const pages = ref(0);
+    const size = 10;
+
+    onMounted(() => {
+      getAllProducers({ current: "1", size: size }).then((res) => {
+        tableData.value = res.data.data.records;
+        current.value = res.data.data.current;
+        pages.value = res.data.data.pages;
+      });
+    });
+
+    const reloadTable = () => {
+      getAllProducers({ current: current.value, size: size }).then((res) => {
+        tableData.value = res.data.data.records;
+        current.value = res.data.data.current;
+        pages.value = res.data.data.pages;
+      });
+    };
+
     const deleteForm = reactive({
       id: "",
     });
@@ -158,32 +189,6 @@ export default {
       y: "",
     });
 
-    const tableData = [
-      {
-        id: "10000001",
-        date: "2016-05-03",
-        name: "Tom",
-        address: "No. 189, Grove St, Los Angeles",
-      },
-      {
-        id: "10000002",
-        date: "2016-05-02",
-        name: "Tom",
-        address: "No. 189, Grove St, Los Angeles",
-      },
-      {
-        id: "10000003",
-        date: "2016-05-04",
-        name: "Tom",
-        address: "No. 189, Grove St, Los Angeles",
-      },
-      {
-        id: "10000004",
-        date: "2016-05-01",
-        name: "Tom",
-        address: "No. 189, Grove St, Los Angeles",
-      },
-    ];
     const onSubmit = () => {
       console.log("submit!");
     };
@@ -226,6 +231,9 @@ export default {
     const formLabelWidth = "140px";
 
     return {
+      reloadTable,
+      current,
+      pages,
       formLabelWidth,
       tableData,
       confirmAdd,
